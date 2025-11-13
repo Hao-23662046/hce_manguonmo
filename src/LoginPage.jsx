@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import anhlogo1 from "./assets/images/login.png";
 import "./assets/css/Login.css";
+import { supabase } from "./supabaseClient";
 
 const LoginPage = () => {
   const [username, setUsername] = useState("");
@@ -9,32 +10,79 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
+    if (!username.trim() || !password.trim()) {
+      alert("❌ Vui lòng nhập đầy đủ thông tin!");
+      return;
+    }
     setLoading(true);
+    try {
+      const { data: userData, error } = await supabase
+        .from("tbl_user")
+        .select(
+          `
+          id, username, password_hash, fullname, email,
+          tbl_roles(role_name)
+        `
+        )
+        .eq("username", username)
+        .single();
 
-    setTimeout(() => {
-      if (username.trim() && password.trim()) {
-        localStorage.setItem(
-          "user",
-          JSON.stringify({ username, role: "user" })
-        );
-        alert("✅ Đăng nhập thành công!");
-        navigate("/");
-      } else {
-        alert("❌ Vui lòng nhập đầy đủ thông tin!");
+      if (error || !userData) {
+        alert("❌ Tên đăng nhập không tồn tại!");
+        setLoading(false);
+        return;
       }
+
+      const sha256 = async (text) => {
+        const buf = await crypto.subtle.digest(
+          "SHA-256",
+          new TextEncoder().encode(text)
+        );
+        return Array.from(new Uint8Array(buf))
+          .map((b) => b.toString(16).padStart(2, "0"))
+          .join("");
+      };
+
+      const hashInput = await sha256(password);
+
+      if (hashInput !== userData.password_hash) {
+        alert("❌ Mật khẩu không đúng!");
+        setLoading(false);
+        return;
+      }
+
+      const role = userData.tbl_roles?.role_name || "user";
+
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          id: userData.id,
+          username: userData.username,
+          fullname: userData.fullname,
+          role,
+        })
+      );
+
+      alert(`✅ Đăng nhập thành công! Xin chào ${userData.fullname}`);
+      navigate("/");
+      window.location.reload();
+    } catch (err) {
+      console.error(err);
+      alert("⚠️ Lỗi hệ thống khi đăng nhập!");
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   return (
     <div className="login-wrapper">
-      <div className="login-card">
+      <div className="login-card shadow">
         <img src={anhlogo1} alt="Logo" className="login-logo" />
 
-        <h2 className="login-title">Đăng nhập vào tài khoản</h2>
-        <p className="login-subtitle">Sử dụng tài khoản của bạn để tiếp tục</p>
+        <h2 className="login-title">Đăng nhập</h2>
+        <p className="login-subtitle">Nhập thông tin tài khoản của bạn</p>
 
         <form onSubmit={handleLogin} className="login-form">
           <div className="form-group">
@@ -57,7 +105,7 @@ const LoginPage = () => {
             />
           </div>
 
-          <button type="submit" disabled={loading}>
+          <button type="submit" className="login-btn" disabled={loading}>
             {loading ? "⏳ Đang xử lý..." : "Đăng nhập"}
           </button>
         </form>
@@ -65,24 +113,6 @@ const LoginPage = () => {
         <p className="register-link">
           Bạn chưa có tài khoản? <a href="#">Tạo tài khoản mới</a>
         </p>
-
-        <div className="social-login">
-          <button className="social-btn google">
-            <img
-              src="https://upload.wikimedia.org/wikipedia/commons/0/09/IOS_Google_icon.png"
-              alt="Google"
-            />
-            <span>Đăng nhập Google</span>
-          </button>
-
-          <button className="social-btn facebook">
-            <img
-              src="https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg"
-              alt="Facebook"
-            />
-            <span>Facebook</span>
-          </button>
-        </div>
       </div>
     </div>
   );

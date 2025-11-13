@@ -1,6 +1,6 @@
-// Sửa ngày 4/11/2025 vì thêm trang quản trị sản phẩm dành cho Admin (CRUD Supabase + UI Grid)
 import React, { useEffect, useState } from "react";
 import { supabase } from "./supabaseClient";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 const ListProducts_SP_Admin = () => {
   const [products, setProducts] = useState([]);
@@ -13,7 +13,6 @@ const ListProducts_SP_Admin = () => {
     rating_count: "",
   });
 
-  // 🔹 Lấy danh sách sản phẩm
   const fetchProducts = async () => {
     const { data, error } = await supabase
       .from("product1")
@@ -27,7 +26,6 @@ const ListProducts_SP_Admin = () => {
     fetchProducts();
   }, []);
 
-  // 🔹 Xử lý nhập liệu form
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (editingProduct) {
@@ -37,7 +35,6 @@ const ListProducts_SP_Admin = () => {
     }
   };
 
-  // 🔹 Thêm sản phẩm mới
   const handleAdd = async (e) => {
     e.preventDefault();
     const { error } = await supabase.from("product1").insert([newProduct]);
@@ -55,7 +52,6 @@ const ListProducts_SP_Admin = () => {
     }
   };
 
-  // 🔹 Cập nhật sản phẩm
   const handleEdit = async (e) => {
     e.preventDefault();
     const { id, ...updated } = editingProduct;
@@ -71,7 +67,6 @@ const ListProducts_SP_Admin = () => {
     }
   };
 
-  // 🔹 Xóa sản phẩm
   const handleDelete = async (id) => {
     if (window.confirm("Bạn có chắc muốn xóa sản phẩm này không?")) {
       const { error } = await supabase.from("product1").delete().eq("id", id);
@@ -84,127 +79,143 @@ const ListProducts_SP_Admin = () => {
   };
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <h2 className="text-3xl font-semibold mb-8 text-center text-blue-600">
+    <div className="container py-5">
+      <h2 className="text-center mb-5 text-primary">
         🛠️ Quản lý sản phẩm (Admin)
       </h2>
 
       {/* Form thêm/sửa sản phẩm */}
-      <form
-        onSubmit={editingProduct ? handleEdit : handleAdd}
-        className="bg-white shadow-md rounded-lg p-6 mb-10 max-w-2xl mx-auto"
-      >
-        <h3 className="text-xl font-medium mb-4">
-          {editingProduct ? "✏️ Chỉnh sửa sản phẩm" : "➕ Thêm sản phẩm mới"}
-        </h3>
+      <div className="card mb-5 shadow-sm">
+        <div className="card-body">
+          <h5 className="card-title">
+            {editingProduct ? "✏️ Chỉnh sửa sản phẩm" : "➕ Thêm sản phẩm mới"}
+          </h5>
+          <form onSubmit={editingProduct ? handleEdit : handleAdd}>
+            <div className="row g-3">
+              <div className="col-md-6">
+                <input
+                  type="text"
+                  name="title"
+                  className="form-control"
+                  placeholder="Tên sản phẩm"
+                  value={
+                    editingProduct ? editingProduct.title : newProduct.title
+                  }
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div className="col-md-6">
+                <input
+                  type="number"
+                  name="price"
+                  className="form-control"
+                  placeholder="Giá"
+                  value={
+                    editingProduct ? editingProduct.price : newProduct.price
+                  }
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div className="col-12">
+                <input
+                  type="text"
+                  name="image"
+                  className="form-control"
+                  placeholder="URL hình ảnh"
+                  value={
+                    editingProduct ? editingProduct.image : newProduct.image
+                  }
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="col-md-6">
+                <input
+                  type="number"
+                  step="0.1"
+                  name="rating_rate"
+                  className="form-control"
+                  placeholder="Đánh giá (0–5)"
+                  value={
+                    editingProduct
+                      ? editingProduct.rating_rate
+                      : newProduct.rating_rate
+                  }
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="col-md-6">
+                <input
+                  type="number"
+                  name="rating_count"
+                  className="form-control"
+                  placeholder="Số lượt đánh giá"
+                  value={
+                    editingProduct
+                      ? editingProduct.rating_count
+                      : newProduct.rating_count
+                  }
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <input
-            name="title"
-            placeholder="Tên sản phẩm"
-            value={editingProduct ? editingProduct.title : newProduct.title}
-            onChange={handleChange}
-            className="border rounded-md p-2"
-            required
-          />
-          <input
-            name="price"
-            type="number"
-            placeholder="Giá"
-            value={editingProduct ? editingProduct.price : newProduct.price}
-            onChange={handleChange}
-            className="border rounded-md p-2"
-            required
-          />
-          <input
-            name="image"
-            placeholder="URL hình ảnh"
-            value={editingProduct ? editingProduct.image : newProduct.image}
-            onChange={handleChange}
-            className="border rounded-md p-2 col-span-2"
-          />
-          <input
-            name="rating_rate"
-            type="number"
-            step="0.1"
-            placeholder="Đánh giá (0–5)"
-            value={
-              editingProduct
-                ? editingProduct.rating_rate
-                : newProduct.rating_rate
-            }
-            onChange={handleChange}
-            className="border rounded-md p-2"
-          />
-          <input
-            name="rating_count"
-            type="number"
-            placeholder="Số lượt đánh giá"
-            value={
-              editingProduct
-                ? editingProduct.rating_count
-                : newProduct.rating_count
-            }
-            onChange={handleChange}
-            className="border rounded-md p-2"
-          />
+            <div className="mt-3 text-end">
+              {editingProduct && (
+                <button
+                  type="button"
+                  onClick={() => setEditingProduct(null)}
+                  className="btn btn-secondary me-2"
+                >
+                  Hủy
+                </button>
+              )}
+              <button type="submit" className="btn btn-primary">
+                {editingProduct ? "Lưu thay đổi" : "Thêm sản phẩm"}
+              </button>
+            </div>
+          </form>
         </div>
-
-        <div className="flex justify-end mt-4 gap-2">
-          {editingProduct && (
-            <button
-              type="button"
-              onClick={() => setEditingProduct(null)}
-              className="bg-gray-400 text-white px-4 py-2 rounded-md hover:bg-gray-500"
-            >
-              Hủy
-            </button>
-          )}
-          <button
-            type="submit"
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-          >
-            {editingProduct ? "Lưu thay đổi" : "Thêm sản phẩm"}
-          </button>
-        </div>
-      </form>
+      </div>
 
       {/* Danh sách sản phẩm dạng Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+      <div className="row g-4">
         {products.map((p) => (
-          <div
-            key={p.id}
-            className="bg-white shadow-sm rounded-xl p-4 border hover:shadow-lg transition transform hover:-translate-y-1"
-          >
-            <div className="flex items-center justify-center mb-3">
+          <div key={p.id} className="col-12 col-sm-6 col-md-4 col-lg-3">
+            <div className="card h-100 shadow-sm">
               <img
                 src={p.image}
                 alt={p.title}
-                width="80"
-                className="w-20 h-20 object-cover rounded-md border"
+                className="card-img-top"
+                style={{
+                  width: "150px",
+                  height: "150px",
+                  objectFit: "cover",
+                  margin: "10px auto 0",
+                }}
               />
-            </div>
-            <h4 className="font-semibold text-md mb-1 text-gray-800 truncate">
-              {p.title}
-            </h4>
-            <p className="text-red-500 font-bold mb-1">${p.price}</p>
-            <p className="text-sm text-gray-600 mb-3">
-              ⭐ {p.rating_rate} ({p.rating_count})
-            </p>
-
-            <div className="flex justify-between">
-              <button
-                onClick={() => setEditingProduct(p)}
-                className="bg-yellow-500 text-white px-3 py-1 rounded-md hover:bg-yellow-600 text-sm"
-              >
-                Sửa
-              </button>
-              <button
-                onClick={() => handleDelete(p.id)}
-                className="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 text-sm"
-              >
-                Xóa
-              </button>
+              <div className="card-body d-flex flex-column">
+                <h6 className="card-title text-truncate">{p.title}</h6>
+                <p className="text-danger fw-bold mb-1">${p.price}</p>
+                <p className="text-muted mb-3">
+                  ⭐ {p.rating_rate} ({p.rating_count})
+                </p>
+                <div className="mt-auto d-flex justify-content-end gap-2">
+                  <button
+                    onClick={() => setEditingProduct(p)}
+                    className="btn btn-warning btn-sm"
+                  >
+                    Sửa
+                  </button>
+                  <button
+                    onClick={() => handleDelete(p.id)}
+                    className="btn btn-danger btn-sm"
+                  >
+                    Xóa
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         ))}

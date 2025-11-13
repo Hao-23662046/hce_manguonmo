@@ -6,14 +6,17 @@ import Layout from "./Layout";
 // @ts-ignore
 import Trang1 from "./Trang1";
 // @ts-ignore
-import ProductDetail from "./ProductDetail";
+import Chitietsanpham from "./Chitietsanpham";
 // @ts-ignore
 import Trang2 from "./Trang2";
 // @ts-ignore
 import ListProducts from "./ListProducts";
-
+// @ts-ignore
+import ProductDetail from "./ProductDetail";
 // @ts-ignore
 import ListProducts_SP from "./ListProducts_SP";
+// @ts-ignore
+import GioiThieu from "./GioiThieu";
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
@@ -37,16 +40,11 @@ const App = () => {
           <Route index element={<ListProducts_SP />} />
           <Route path="trang1" element={<Trang1 />} />
           <Route path="trang2" element={<Trang2 />} />
-          <Route path="sanpham/:id" element={<ProductDetail />} />
-          {/* <Route path="detail/:id" element={<ProductDetail />} /> */}
-
-          {/* ✅ Trang đăng nhập (nằm trong Layout) */}
+          <Route path="sanpham/:id" element={<Chitietsanpham />} />
+          <Route path="detail/:id" element={<ProductDetail />} />
+          <Route path="GioiThieu" element={<GioiThieu />} />
           <Route path="login" element={<LoginPage />} />
-
-          {/* ✅ Trang đăng xuất */}
           <Route path="logout" element={<LogoutPage />} />
-
-          {/* ✅ Trang quản trị (nằm trong Layout, chỉ Admin truy cập) */}
           <Route
             path="admin/products"
             element={
